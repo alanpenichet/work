@@ -2,20 +2,15 @@ package assignment4;
 /* CRITTERS Main.java
  * EE422C Project 4 submission by
  * Replace <...> with your actual data.
- * <Student1 Name>
- * <Student1 EID>
- * <Student1 5-digit Unique No.>
- * <Student2 Name>
- * <Student2 EID>
- * <Student2 5-digit Unique No.>
- * Slip days used: <0>
+ * Alan Penichet-Paul
+ * Ap46378
+ * 16190
+ * Slip days used: 2
  * Spring 2019
  */
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Scanner;
-import java.awt.List;
 import java.io.*;
 import java.lang.reflect.Method;
 
@@ -75,7 +70,12 @@ public class Main {
 
     }
     /* Do not alter the code above for your submission. */
-
+    
+    /**
+     * Interprets and Parses inputs to run driver commands.
+     *
+     * @param kb 	Scanner used to receive inputs.
+     */
     private static void commandInterpreter (Scanner kb) {    	
     	boolean quit = false;
     	String full = null;
@@ -84,7 +84,6 @@ public class Main {
     	//tabs and spaces do not matter, make sure to fix
     	while(!quit) {
     		full = kb.nextLine();
-        	//TODO change to any whitespace
         	String[] entries = full.split(" ");
         	//create arraylist of all entries before new line
         	ArrayList<String> entriesList = new ArrayList<String>();
@@ -93,45 +92,84 @@ public class Main {
         	}
         	String command = entriesList.get(0);
 		    	switch(command){
-		    	case "quit": quit = true; break;
-		    	case "step": int Steps = 1; 
-		    	//TODO: make sure no neg nums
-		    		if(entriesList.size()>1) Steps = Integer.parseInt(entriesList.get(1));
-		    		for(int i = 0; i < Steps; i++){ Critter.worldTimeStep();} break;
-		    	case "show": Critter.displayWorld();  break;
-		    	case "seed": Critter.setSeed(Integer.parseInt(entriesList.get(1))); break;
+		    	case "quit": 
+		    		try{
+		    			if(entriesList.get(1)!=null) {
+		    				System.out.println("error processing: " + full);
+		    			}
+		    		} catch( IndexOutOfBoundsException e) {
+		    			quit = true;
+		    		}
+		    		break;
+		    	case "step": 
+		    			int Steps = 1; 
+		    			//not account for negative numbers
+			    		try{    
+			    			if(entriesList.size()>2) {
+			    				throw new Exception();
+			    			}
+				    			if(entriesList.size()>1) Steps = Integer.parseInt(entriesList.get(1));
+				    			for(int i = 0; i < Steps; i++){ Critter.worldTimeStep();}
+			    		} catch(Exception e) {
+			    			System.out.println("error processing: " + full);
+			    		}
+			            break;
+		    	case "show": 
+			    		if(entriesList.size()==1) {
+			    			Critter.displayWorld();
+			    		} else System.out.println("error processing: " + full);
+		    			break;
+		    	case "seed":
+		    		try{    
+		    			if(entriesList.size()>2) {
+		    				throw new Exception();
+		    			}
+		    			Critter.setSeed(Integer.parseInt(entriesList.get(1)));
+		    		} catch(Exception e) {
+		    			System.out.println("error processing: " + full);
+		    		} break;
 		    	case "create": 
-		    	String critType = entriesList.get(1);
-		    		int numCrits = Integer.parseInt(entriesList.get(2));
-					try {
-						for(int i=0; i< numCrits; i++) {
-							Critter.createCritter(critType);
-						}
-						
-					} catch (InvalidCritterException e1) {
-						// TODO print error message
-				
-					} 	break;
+			    	String critType = entriesList.get(1);
+						try {
+							if(entriesList.size()>3) {
+								throw new Exception();
+							}
+							int numCrits = Integer.parseInt(entriesList.get(2));
+							for(int i=0; i< numCrits; i++) {
+								Critter.createCritter(critType);
+							}
+							
+						} catch (InvalidCritterException e) {
+							System.out.println("error processing: " + full);
+						} 
+						catch (Exception e1) {
+							System.out.println("error processing: " + full);
+					
+						} break;
 		    	case "stats": 
-		    	try {
-		    		//TODO - try this
-		    		String classname = myPackage + "." + entriesList.get(1);
-					java.util.List<Critter> critterList = Critter.getInstances(classname);
-					//System.out.println(critterList.toString());
-					Class critterType = null;
-					critterType = Class.forName(classname);
-					//System.out.println(critterType);
-					Method m = critterType.getMethod("runStats", java.util.List.class);
-					m.invoke(critterList.getClass(), critterList);
+				    	try {
+				    		if(entriesList.size()>2) {
+				    			throw new Exception();
+				    		}
+				    		String classname = entriesList.get(1);
+							java.util.List<Critter> critterList = Critter.getInstances(classname);
+							//System.out.println(critterList.toString());
+							Class critterType = Class.forName(myPackage + "." + classname);
+							//System.out.println(critterType);
+							Method m = critterType.getMethod("runStats", java.util.List.class);
+							m.invoke(critterList.getClass(), critterList);
+				    	}
+				    	catch(Exception e) {
+				    		System.out.println("error processing: " + full);
+				    	}
+				    	break;
+		    	case "clear": if(entriesList.size()==1) {Critter.clearWorld();}
+				    	else{
+				    		System.out.println("error processing: " + full);
+				    	} break;
+		    	default: System.out.println("invalid command: " + full);
 		    	}
-		    	catch(Exception e) {
-		    		//TODO print error message
-		    	}
-		    	break;
-		    	case "clear": Critter.clearWorld();	break;
-		    	default: System.out.println("invalid command: " + command);
-		    	}
-		    	//System.out.println();
     	}
+    	Critter.clearWorld();
     }
 }
